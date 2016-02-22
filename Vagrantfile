@@ -87,6 +87,16 @@ module Forklift
         networks.each do |network|
           override.vm.network network['type'], network['options']
         end
+
+        p.storage_pool_name = "another_space"
+
+        if machine.vm.hostname.match "centos7-devel"
+          config.sshfs.paths = { "/home/vagrant/projects" => "../../vagrant-box/seven" }
+          config.sshfs.sudo = false
+          #override.vm.network :public_network, :ip => '192.168.100.20', :libvirt__network_name => "default" #:dev => "eth0", :mode => "nat"
+          #p.storage_pool_name = "another_space"
+        end
+
         p.cpus = box.fetch('cpus') if box.fetch('cpus', false)
         p.memory = box.fetch('memory') if box.fetch('memory', false)
         p.machine_virtual_size = box.fetch('disk_size') if box.fetch('disk_size', false)

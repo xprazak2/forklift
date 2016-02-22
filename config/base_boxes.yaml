@@ -78,3 +78,4 @@ boxes:
     ansible:
       playbook: 'playbooks/hammer_devel.yml'
       group: 'hammer_devel'
+    privileged: false
