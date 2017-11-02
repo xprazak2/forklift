@@ -121,6 +121,12 @@
     --unlimited-hosts
   when: katello_provisioning_activation_key.stderr.find('not found') != -1
 
+- name: 'Create CentOS_Linux 7'
+  shell: >
+    {{ katello_provisioning_hammer }} os create
+    --name CentOS_Linux --major 7 --architectures x86_64 --family 'Redhat'
+  ignore_errors: true
+
 # Associate templates
 - name: 'find CentOS_Linux 7'
   shell: >

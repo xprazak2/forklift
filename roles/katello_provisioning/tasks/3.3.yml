@@ -1,0 +1,6 @@
+- name: 'find CentOS_Linux 7'
+  shell: >
+    {{ katello_provisioning_hammer }} --output json os info --name "CentOS_Linux 7" ||
+    {{ katello_provisioning_hammer }} --output json os info --title "CentOS_Linux 7"
+  register: katello_provisioning_centos7_json
+  ignore_errors: True
