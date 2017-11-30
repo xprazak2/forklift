@@ -2,19 +2,76 @@
 - name: 'Import puppet classes'
   shell: >
     {{ foreman_openscap_hammer }} proxy import-classes --name {{ foreman_openscap_proxy_name }}
-  when: '{{ foreman_openscap_proxy_name != False }}'
+  tags:
+    - seed
+  when: foreman_openscap_proxy_name != False
 
 - name: 'Import default scap content'
   shell: >
     foreman-rake foreman_openscap:bulk_upload:default
-  when: '{{ foreman_openscap_proxy_name != False }}'
+  tags:
+    - seed
+  when: foreman_openscap_proxy_name != False
 
-# TODO: disabled until cli is fixed
-# - name: 'Create example policy'
-#   shell: >
-#     {{ foreman_openscap_hammer }} policy create --name 'Example policy'
-#      --period weekly --weekday monday
-#      --scap-content 'Red Hat centos6 default content'
-#      --scap-content-profile-id TODO
-#   tags:
-#     - seed
+- name: 'Create oscap hostgroup in org'
+  shell: >
+    {{ foreman_openscap_hammer }} hostgroup create
+    --name "Forklift Oscap"
+    --parent '{{ foreman_openscap_hostgroup_parent }}'
+    --query-organization "{{ foreman_openscap_organization }}"
+    --openscap-proxy-id 1
+  when: foreman_openscap_organization != "" and foreman_openscap_hostgroup_parent != ""
+
+- name: 'Create oscap hostgroup without org'
+  shell: >
+    {{ foreman_openscap_hammer }} hostgroup create
+    --name "Forklift Oscap"
+    --parent '{{ foreman_openscap_hostgroup_parent }}'
+    --openscap-proxy-id 1
+  when: foreman_openscap_organization == "" and foreman_openscap_hostgroup_parent != ""
+
+- name: 'Create oscap hostgroup without parent'
+  shell: >
+      {{ foreman_openscap_hammer }} hostgroup create
+      --name "Forklift Oscap"
+      --openscap-proxy-id 1
+  when: foreman_openscap_organization == "" and foreman_openscap_hostgroup_parent == ""
+
+- name: 'Find firefox content'
+  shell: >
+    {{ foreman_openscap_hammer }} --output json scap-content info --title 'Red Hat firefox default content'
+  register: find_firefox_scap_content
+
+- name: 'Set firefox fact'
+  set_fact:
+    firefox_scap_content_json: "{{ find_firefox_scap_content.stdout | from_json }}"
+
+# find out if scap_content for os has always same id on centos/rhel
+- name: 'Find OS content'
+  shell: >
+    {{ foreman_openscap_hammer }} --output json scap-content info --title '{{ foreman_openscap_os_content_name }}'
+  register: find_centos_scap_content
+
+- name: 'Set centos fact'
+  set_fact:
+    firefox_scap_content_json: "{{ find_centos_scap_content.stdout | from_json }}"
+
+- name: 'Create firefox policy'
+  shell: >
+    {{ foreman_openscap_hammer }} policy create --name 'Firefox policy'
+     --period weekly --weekday monday
+     --scap-content 'Red Hat firefox default content'
+     --scap-content-profile-id {{ (firefox_scap_content_json[\"SCAP content profiles\"] | first).Id }}
+     --hostgroups "Forklift Oscap"
+  tags:
+    - seed
+
+- name: 'Create centos policy'
+  shell: >
+    {{ foreman_openscap_hammer }} policy create --name '{{ foreman_openscap_os_content_name }} policy'
+     --period weekly --weekday monday
+     --scap-content '{{ foreman_openscap_os_content_name }}'
+     --scap-content-profile-id {{ (centos_scap_content_json[\"SCAP content profiles\"] | first).Id }}
+     --hostgroups "Forklift Oscap"
+  tags:
+    - seed
