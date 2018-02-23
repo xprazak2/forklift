@@ -14,6 +14,11 @@
     name: "libvirt-python"
     state: present
 
+- name: 'install libvirt on 6'
+  yum:
+    name: "libvirt"
+    state: "present"
+
 - name: 'disable libvirt authentication'
   lineinfile:
     dest: /etc/libvirt/libvirtd.conf
@@ -30,17 +35,27 @@
   yum:
     name: python-lxml
 
+- name: Creates images folder
+  file: path={{ libvirt_setup_storage_path }} state=directory
+
 - name: 'create the provisioning libvirt network'
   virt_net:
     command: define
     name: provision
     xml: '{{ lookup("template", "../templates/network.xml.j2") }}'
 
-- name: 'create the provisioning storage'
-  virt_pool:
-    command: define
-    name: provision
-    xml: '{{ lookup("template", "../templates/storage.xml.j2") }}'
+# - name: 'create the provisioning storage'
+#   virt_pool:
+#     command: define
+#     name: provision
+#     xml: '{{ lookup("template", "../templates/storage.xml.j2") }}'
+
+- template:
+    src: storage.xml.j2
+    dest: /storage.xml
+
+- name: 'create the provisioning storage el6'
+  shell: 'virsh pool-define --file /storage.xml'
 
 # Setup TFTP for libvirt
 - name: 'create /var/lib/tftpboot'
@@ -67,5 +82,11 @@
 - name: 'start the provision libvirt network'
   virt_net: state=active name=provision autostart=yes
 
-- name: 'start the provision libvirt storage pool'
-  virt_pool: state=active name=provision autostart=yes
+- name: 'set net autostart'
+  shell: 'virsh net-autostart provision'
+
+# - name: 'start pool'
+#   shell: 'virsh pool-start provision'
+
+# - name: 'start the provision libvirt storage pool'
+#   virt_pool: state=active name=provision autostart=yes
