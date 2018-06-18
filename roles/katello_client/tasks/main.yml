@@ -1,6 +1,6 @@
 ---
 - name: 'Cleanup previous registrations'
-  include_tasks: cleanup.yml
+  import_tasks: cleanup.yml
   when: katello_client_cleanup
 
 - name: 'Install bootstrap rpm'
