@@ -2,40 +2,20 @@
 - name: 'Import puppet classes'
   shell: >
     {{ foreman_openscap_hammer }} proxy import-classes --name {{ foreman_openscap_proxy_name }}
-  tags:
-    - seed
-  when: foreman_openscap_proxy_name != False
+  when: foreman_openscap_proxy_name != ""
 
 - name: 'Import default scap content'
   shell: >
     foreman-rake foreman_openscap:bulk_upload:default
-  tags:
-    - seed
-  when: foreman_openscap_proxy_name != False
+  when: foreman_openscap_proxy_name != ""
 
 - name: 'Create oscap hostgroup in org'
   shell: >
     {{ foreman_openscap_hammer }} hostgroup create
     --name "Forklift Oscap"
-    --parent '{{ foreman_openscap_hostgroup_parent }}'
+    {{ --parent foreman_openscap_hostgroup_parent if foreman_openscap_hostgroup_parent else "" }}
     --query-organization "{{ foreman_openscap_organization }}"
     --openscap-proxy-id 1
-  when: foreman_openscap_organization != "" and foreman_openscap_hostgroup_parent != ""
-
-- name: 'Create oscap hostgroup without org'
-  shell: >
-    {{ foreman_openscap_hammer }} hostgroup create
-    --name "Forklift Oscap"
-    --parent '{{ foreman_openscap_hostgroup_parent }}'
-    --openscap-proxy-id 1
-  when: foreman_openscap_organization == "" and foreman_openscap_hostgroup_parent != ""
-
-- name: 'Create oscap hostgroup without parent'
-  shell: >
-      {{ foreman_openscap_hammer }} hostgroup create
-      --name "Forklift Oscap"
-      --openscap-proxy-id 1
-  when: foreman_openscap_organization == "" and foreman_openscap_hostgroup_parent == ""
 
 - name: 'Find firefox content'
   shell: >
@@ -63,8 +43,6 @@
      --scap-content 'Red Hat firefox default content'
      --scap-content-profile-id {{ (firefox_scap_content_json[\"SCAP content profiles\"] | first).Id }}
      --hostgroups "Forklift Oscap"
-  tags:
-    - seed
 
 - name: 'Create centos policy'
   shell: >
@@ -73,5 +51,3 @@
      --scap-content '{{ foreman_openscap_os_content_name }}'
      --scap-content-profile-id {{ (centos_scap_content_json[\"SCAP content profiles\"] | first).Id }}
      --hostgroups "Forklift Oscap"
-  tags:
-    - seed

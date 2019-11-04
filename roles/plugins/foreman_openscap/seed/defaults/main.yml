@@ -1,7 +1,6 @@
 ---
 foreman_openscap_hammer: hammer
-foreman_openscap_proxy_name: False
-foreman_openscap_installer_options: ""
+foreman_openscap_proxy_name: ""
 foreman_openscap_hostgroup_parent: ""
-foreman_openscap_organization: ""
+foreman_openscap_organization: "Default Organization"
 foreman_openscap_os_content_name: "Red Hat centos7 default content"
