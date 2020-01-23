@@ -8,7 +8,12 @@
       --enable-foreman-cli-openscap
       {{ foreman_openscap_installer_options }}
 
-- name: 'Install foreman openscap puppet module'
+- name: 'Install foreman openscap Puppet module'
   yum:
     name: 'puppet-foreman_scap_client'
+    state: 'present'
+
+- name: 'Install foreman openscap Ansible role'
+  yum:
+    name: 'ansiblerole-foreman_scap_client'
     state: 'present'

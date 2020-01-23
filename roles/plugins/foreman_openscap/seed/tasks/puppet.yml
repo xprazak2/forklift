@@ -1,0 +1,22 @@
+---
+- name: 'Import Puppet classes'
+  shell: >
+    {{ foreman_openscap_hammer }} proxy import-classes --name {{ foreman_openscap_puppet_proxy }}
+
+- name: 'Create oscap puppet hostgroup in org'
+  shell: >
+    {{ foreman_openscap_hammer }} hostgroup create
+    --name "Forklift Oscap Puppet"
+    {{ --parent foreman_openscap_hostgroup_parent if foreman_openscap_hostgroup_parent else "" }}
+    --query-organization "{{ foreman_openscap_organization }}"
+    --openscap-proxy {{ foreman_openscap_proxy }}
+
+- name: 'Create puppet policies'
+  shell: >
+    {{ foreman_openscap_hammer }} policy create --name '{{ item.name }} puppet policy'
+     --period weekly --weekday monday
+     --scap-content '{{ item.scap_content }}'
+     --scap-content-profile-id {{ item.profile_id }}
+     --deploy-by puppet
+     --hostgroups 'Forklift Oscap Puppet'
+  with_items: "{{ foreman_openscap_policies }}"

@@ -9,4 +9,8 @@ dependencies:
   # use role instead of installer options for openscap to install theforeman-foreman_scap_client puppet module
   - role: 'plugins/foreman_openscap/install'
   - role: 'plugins/foreman_openscap/seed'
+    foreman_openscap_proxy: "{{ ansible_fqdn }}"
+    foreman_openscap_ansible_proxy: "{{ ansible_fqdn }}"
+    foreman_openscap_puppet_proxy: "{{ ansible_fqdn }}"
+    foreman_openscap_hostgroup_parent: "Katello CentOS 7"
   - role: 'plugins/foreman_templates/seed'

@@ -1,0 +1,35 @@
+---
+- name: 'Get ansible proxy id'
+  shell: >
+    {{ foreman_provisioning_hammer }} --output json proxy info --name {{ foreman_openscap_ansible_proxy }}
+  register: foreman_openscap_ansible_proxy_json
+
+- name: 'Set ansible proxy id'
+  set_fact:
+    foreman_openscap_ansible_proxy_id: "{{ foreman_openscap_ansible_proxy_json.stdout | from_json }}"
+
+- name: 'Import Ansible roles'
+  shell: >
+    {{ foreman_openscap_hammer }} ansible roles import --proxy-id {{ foreman_openscap_ansible_proxy_id }}
+
+- name: 'Import Ansible variables'
+  shell: >
+    {{ foreman_openscap_hammer }} ansible variables import --proxy-id {{ foreman_openscap_ansible_proxy_id }}
+
+- name: 'Create oscap ansible hostgroup in org'
+  shell: >
+    {{ foreman_openscap_hammer }} hostgroup create
+    --name "Forklift Oscap Ansible"
+    {{ --parent foreman_openscap_hostgroup_parent if foreman_openscap_hostgroup_parent else "" }}
+    --query-organization "{{ foreman_openscap_organization }}"
+    --openscap-proxy {{ foreman_openscap_proxy }}
+
+- name: 'Create policies'
+  shell: >
+    {{ foreman_openscap_hammer }} policy create --name '{{ item.name }} ansible policy'
+     --period weekly --weekday monday
+     --scap-content '{{ item.scap_content }}'
+     --scap-content-profile-id {{ item.profile_id }}
+     --deploy-by ansible
+     --hostgroups "Forklift Oscap Ansible"
+  with_items: "{{ foreman_openscap_policies }}"

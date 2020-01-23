@@ -1,6 +1,7 @@
 ---
 luna_provisioning_installer_options: []
 luna_provisioning_installer_internal_options:
+  - "--enable-foreman-cli-ansible"
   - "--enable-foreman-cli-discovery"
   - "--enable-foreman-cli-remote-execution"
   - "--enable-foreman-cli-tasks"

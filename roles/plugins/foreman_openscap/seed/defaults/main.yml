@@ -1,6 +1,16 @@
 ---
 foreman_openscap_hammer: hammer
-foreman_openscap_proxy_name: ""
+foreman_openscap_puppet_proxy: ""
+foreman_openscap_ansible_proxy: ""
+foreman_openscap_proxy: ""
 foreman_openscap_hostgroup_parent: ""
 foreman_openscap_organization: "Default Organization"
-foreman_openscap_os_content_name: "Red Hat centos7 default content"
+foreman_openscap_os_content_name: "{{ ansible_distribution.lower() + ansible_distribution_major_version if ansible_distribution == 'CentOS' else 'rhel' + ansible_distribution_major_version }}"
+foreman_openscap_policies:
+  - scap_content: 'Red Hat firefox default content'
+    name: 'Firefox policy'
+    profile_id: xccdf_org.ssgproject.content_profile_stig
+  - scap_content: "Red Hat {{ foreman_openscap_os_content_name }} default content"
+    name: "CS2 policy"
+    profile_id: xccdf_org.ssgproject.content_profile_standard
+

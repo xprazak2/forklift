@@ -1,0 +1,10 @@
+---
+- name: 'Import default scap content'
+  shell: >
+    foreman-rake foreman_openscap:bulk_upload:default
+
+- include: puppet.yml
+  when: foreman_openscap_puppet_proxy != ""
+
+- include: ansible.yml
+  when: foreman_openscap_ansible_proxy != ""
