@@ -1,0 +1,12 @@
+---
+- import_playbook: katello_devel.yml
+  vars:
+    foreman_installer_options:
+      - "--katello-devel-github-username '{{ katello_devel_github_username }}'"
+      - "--katello-devel-extra-plugins theforeman/foreman_remote_execution"
+      - "--katello-devel-extra-plugins theforeman/foreman_ansible"
+      - "--katello-devel-extra-plugins theforeman/foreman-tasks"
+      - "--katello-devel-extra-plugins theforeman/foreman_leapp"
+      - "--enable-foreman-proxy-plugin-remote-execution-ssh"
+      - "--enable-foreman-proxy-plugin-ansible"
+      - "--no-enable-foreman-proxy-plugin-pulp"
